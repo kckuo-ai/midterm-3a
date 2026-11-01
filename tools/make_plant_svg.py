@@ -2,10 +2,10 @@
 圖：根莖葉總覽、葉（葉脈／葉緣／葉形）、三種莖、兩種根、花的縱剖面、花→果實→種子、種子傳播。
 執行：python3 tools/make_plant_svg.py  → 把圖嵌進 science/notes.html 的 <!-- fig:... --> 標記之間
 """
-import math, pathlib, random
+import math, pathlib, random, re
 
 FONT = "'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif"
-INK = "#2f2a26"
+INK = "#4a4038"
 _P = "x"
 
 
@@ -33,7 +33,7 @@ GRADS = {
     "lan": (0, 0, 0, 1, [(0, "#ffd9b8"), (1, "#e48a63")]),
     "lon": (0, 0, 1, 1, [(0, "#d6b47e"), (1, "#a67c4b")]),
     "ov": (0, 0, 0, 1, [(0, "#d7eeb8"), (1, "#a7d07e")]),
-    "sky": (0, 0, 0, 1, [(0, "#f2f9ff"), (1, "#fffdf8")]),
+    "sky": (0, 0, 0, 1, [(0, "#fbf6ea"), (1, "#f8f1e0")]),
 }
 
 
@@ -42,12 +42,31 @@ def defs():
     for n, (x1, y1, x2, y2, st) in GRADS.items():
         stops = "".join(f'<stop offset="{o}" stop-color="{c}"/>' for o, c in st)
         out.append(f'<linearGradient id="{_P}-{n}" x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}">{stops}</linearGradient>')
+    # 色鉛筆斜線陰影
+    out.append(f'<pattern id="{_P}-ht" width="4.5" height="4.5" patternUnits="userSpaceOnUse" patternTransform="rotate(40)">'
+               f'<line x1="0" y1="0" x2="0" y2="4.5" stroke="#2f5d2a" stroke-width="1" opacity=".55"/></pattern>')
+    # 色鉛筆質感：線條微微抖動＋紙紋顆粒
+    out.append(f'<filter id="{_P}-pencil" x="-2%" y="-2%" width="104%" height="104%">'
+               '<feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="3" result="w"/>'
+               '<feDisplacementMap in="SourceGraphic" in2="w" scale="3.4" xChannelSelector="R" yChannelSelector="G" result="d"/>'
+               '<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="n"/>'
+               '<feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  2.6 0 0 0 -0.55" result="g"/>'
+               '<feComposite in="d" in2="g" operator="in" result="gr"/>'
+               '<feComponentTransfer in="d" result="d2"><feFuncA type="linear" slope="0.62"/></feComponentTransfer>'
+               '<feMerge><feMergeNode in="d2"/><feMergeNode in="gr"/></feMerge></filter>')
+    out.append(f'<filter id="{_P}-paper" x="0" y="0" width="100%" height="100%">'
+               '<feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" seed="2"/>'
+               '<feColorMatrix type="matrix" values="0 0 0 0 .55  0 0 0 0 .48  0 0 0 0 .38  0 0 0 .30 0"/></filter>')
     return "<defs>" + "".join(out) + "</defs>"
 
 
 def svg(w, h, label, body):
+    texts = re.findall(r"<text .*?</text>", body, flags=re.S)
+    body = re.sub(r"<text .*?</text>", "", body, flags=re.S)
     frame = f'<rect x="2" y="2" width="{w-4}" height="{h-4}" rx="8" fill="{U("sky")}" stroke="#b9b2a4" stroke-width="1.2"/>'
-    return f'<svg viewBox="0 0 {w} {h}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{label}">{defs()}{frame}{body}</svg>'
+    grain = f'<rect x="2" y="2" width="{w-4}" height="{h-4}" rx="8" filter="url(#{_P}-paper)" fill="#000" opacity=".5"/>'
+    return (f'<svg viewBox="0 0 {w} {h}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{label}">{defs()}{frame}{grain}'
+            f'<g filter="url(#{_P}-pencil)">{body}</g>{"".join(texts)}</svg>')
 
 
 # ---------- 基本繪圖工具 ----------
@@ -185,7 +204,7 @@ def leaf(x, y, L, W, ang, kind="elliptic", margin="entire", ven="net", bend=0.0,
         d = sm(top) + seg(bot[::-1]) + " Z"
     g = pa(d, U(fill), INK, 1.1)
     half = sm([mid(i / n) for i in range(n + 1)]) + seg(bot[::-1]) + " Z"
-    g += pa(half, "#2f5d2a", "none", 0, 0.10)
+    g += pa(half, U("ht"), "none", 0)
     v = []
     if ven == "net":
         v.append(pa(sm([mid(i / 12 * 0.97) for i in range(13)]), "none", "#4c7f3f", 1.5))
@@ -618,24 +637,24 @@ def fruit_seed():
 
 
 # ---------- 種子傳播 ----------
-def bird(x, y, s=1.0, flip=False):
-    """棲息的小鳥（側面，預設朝右；flip=True 朝左）。腳底約在 y+44。"""
-    g = pa("M-28,4 L-74,-6 L-66,6 L-76,18 L-28,16 Z", "#5f86b8", INK, 1.1)  # 叉形尾羽
+def bird(x, y, s=1.0, flip=False, rot=18):
+    """停在細枝上、低頭啄食的小鳥（預設朝右，flip=True 朝左）。腳底約在 y+44。"""
+    g = pa("M-28,4 L-74,-6 L-66,6 L-76,18 L-28,16 Z", "#5f86b8", INK, 1.1)
     g += ln(-34, 8, -66, 4, "#3f628f", .7) + ln(-34, 11, -68, 12, "#3f628f", .7)
-    g += ln(-6, 30, -8, 44, "#b8793a", 1.8) + ln(10, 30, 10, 44, "#b8793a", 1.8)  # 腳
+    g += ln(-6, 30, -8, 44, "#b8793a", 1.8) + ln(10, 30, 10, 44, "#b8793a", 1.8)
     for fx in (-8, 10):
         g += ln(fx, 44, fx + 7, 45, "#b8793a", 1.5) + ln(fx, 44, fx - 6, 46, "#b8793a", 1.5)
-    body = [(-30, 8), (-22, -8), (-6, -17), (10, -22), (20, -32), (32, -37), (44, -30), (46, -20), (41, -11), (35, -5),
-            (38, 8), (31, 23), (12, 32), (-8, 30), (-22, 21)]
+    body = [(-30, 8), (-22, -8), (-6, -17), (10, -21), (26, -22), (40, -21), (50, -14), (55, -5), (52, 3), (44, 7), (37, 10),
+            (37, 18), (31, 26), (12, 32), (-8, 30), (-22, 21)]
     g += pa(smc(body), "#7ea7d6", INK, 1.3)
-    g += pa(smc([(35, -5), (38, 8), (31, 23), (12, 32), (-8, 30), (-14, 18), (6, 9), (24, 1)]), "#f7f1df", "none", 0)  # 淺色腹部
-    g += pa("M35,-5 Q38,8 31,23 Q12,32 -8,30", "none", INK, 1.2)
-    g += pa(smc([(4, -12), (20, -6), (14, 12), (-12, 22), (-38, 20), (-26, 2), (-8, -8)]), "#5f86b8", INK, 1.2)  # 翅膀
+    g += pa(smc([(37, 10), (37, 18), (31, 26), (12, 32), (-8, 30), (-14, 18), (6, 10), (26, 4)]), "#f7f1df", "none", 0)
+    g += pa("M37,10 Q37,18 31,26 Q12,32 -8,30", "none", INK, 1.2)
+    g += pa(smc([(4, -12), (20, -6), (14, 12), (-12, 22), (-38, 20), (-26, 2), (-8, -8)]), "#5f86b8", INK, 1.2)
     for k in range(4):
         g += pa(f"M{-30+k*9},{19-k*2} Q{-14+k*8},{10-k*3} {-4+k*7},{-2-k*2}", "none", "#3f628f", .8)
-    g += pa("M46,-22 L60,-17 L46,-13 Z", "#f0a030", INK, 1.1)  # 喙
-    g += circ(39, -25, 4.6, "#fff", INK, .9) + circ(40, -25, 2.8, INK, "none", 0) + circ(41, -26, 0.9, "#fff", "none", 0)
-    t = f"translate({x} {y}) scale({-s if flip else s} {s})"
+    g += pa("M53,-8 L68,6 L52,2 Z", "#f0a030", INK, 1.1)
+    g += circ(46, -12, 4.6, "#fff", INK, .9) + circ(47, -12, 2.8, INK, "none", 0) + circ(48, -13, 0.9, "#fff", "none", 0)
+    t = f"translate({x} {y}) scale({-s if flip else s} {s}) rotate({rot} 0 30)"
     return f'<g transform="{t}">{g}</g>'
 
 
@@ -660,13 +679,13 @@ def dispersal():
     b = soil(4, W - 4, gy, H - 4, 7, 60) + ln(W / 2, 20, W / 2, gy - 10, "#cfc8b8", 1, "4 4")
     # 左：龍眼，動物傳播
     b += '<g transform="translate(0 24)">' + twig(30, 70, 360, 100)
-    for lx, ang in ((90, 40), (170, 55), (250, 60)):
+    for lx, ang in ((90, 40), (170, 55)):
         ly = 76 + (lx - 30) * .09
         b += leaf(lx, ly, 70, 17, ang, "elliptic", "entire", "net", detail=False) + leaf(lx, ly, 62, 16, ang - 38, "elliptic", "entire", "net", detail=False)
     for fx, fy in ((196, 138), (222, 148), (214, 170), (240, 134), (180, 162), (240, 164), (205, 191)):
         b += ln(fx, fy, 218, 90, "#7a6a45", 1) + circ(fx, fy, 13, U("lon"), INK, 1) + circ(fx - 4, fy - 4, 3, "#fff", "none", 0).replace('fill="#fff"', 'fill="#fff" opacity=".35"')
-    b += bird(288, 40, 1.0, True) + "</g>"
-    b += arrow(285, 178, 336, 300, "#c2402a", 1.6, "5 4")
+    b += tube(qb((354, 97), (352, 150), (296, 174), 14), 6, 3, U("bark"), INK, .9) + bird(314, 118, 1.0, True) + "</g>"
+    b += arrow(290, 214, 336, 300, "#c2402a", 1.6, "5 4")
     b += ell(342, gy - 6, 5, 7, "#4a3320", "none", 0) + sprout(372, gy + 2)
     b += txt(40, 40, "動物傳播：龍眼、木瓜", 18, "#1f1f1f", "bold") + txt(40, 62, "果實芳香甜美，吸引動物來吃", 13, "#666")
     b += txt(20, 150, "① 動物吃果實", 13, "#444") + txt(262, 232, "② 動物離開後，", 13, "#444") + txt(262, 250, "種子隨糞便排出", 13, "#444")
