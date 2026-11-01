@@ -1,9 +1,15 @@
 // 練習卷互動程式：作答 → 交卷計分 → 錯題旁直接顯示正確答案與解析
+// 選用功能：quiz-data.js 設定 scopeKey，且頁面上有 .scope 按鈕時，可切換「期中考／全冊」。
+//   題目加上 later: true 代表不在期中考範圍（只在「全冊」出現）。
 (function () {
   const NUM = ['①', '②', '③', '④', '⑤', '⑥'];
   const data = window.QUIZ;
   const root = document.getElementById('quiz');
-  const state = []; // per item: { sec, item, el, picked }
+  const scoreEl = document.getElementById('score');
+  const scopeBtns = document.querySelectorAll('.scope button');
+  let state = []; // per item: { sec, item, el, picked }
+  let total = 0;
+  let scope = 'all';
 
   function choiceSet(sec, item) {
     switch (sec.type) {
@@ -25,56 +31,63 @@
     if (html != null) e.innerHTML = html;
     return e;
   }
+  function inScope(item) { return scope === 'all' || !item.later; }
 
-  let qNo = 0;
-  data.sections.forEach((sec, si) => {
-    const h = el('h2', null, sec.title);
-    root.appendChild(h);
-    if (sec.note) root.appendChild(el('p', 'section-note', sec.note));
-    if (sec.shared) root.appendChild(el('div', 'shared-opts', sec.shared));
-    sec.items.forEach((item, ii) => {
-      if (item.scene) root.appendChild(el('p', 'section-note', '<b>' + item.scene + '</b>'));
-      const box = el('div', 'q');
-      const stem = el('div', 'stem');
-      stem.appendChild(el('span', 'no', (ii + 1) + '.'));
-      stem.appendChild(el('span', null, item.q));
-      box.appendChild(stem);
-      const cs = el('div', 'choices');
-      const rec = { sec, item, el: box, picked: sec.type === 'multi' ? new Set() : null, btns: [] };
-      choiceSet(sec, item).forEach(c => {
-        const b = el('button', 'choice' + (['tf', 'check', 'match'].includes(sec.type) ? ' big' : ''), c.t);
-        b.type = 'button';
-        b.addEventListener('click', () => {
-          if (root.classList.contains('done')) return;
-          if (sec.type === 'multi') {
-            rec.picked.has(c.v) ? rec.picked.delete(c.v) : rec.picked.add(c.v);
-            b.classList.toggle('sel');
-          } else {
-            rec.picked = c.v;
-            rec.btns.forEach(x => x.classList.remove('sel'));
-            b.classList.add('sel');
-          }
+  function build() {
+    root.innerHTML = '';
+    root.classList.remove('done');
+    state = [];
+    let secNo = 0;
+    const CN = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+    data.sections.forEach(sec => {
+      const items = sec.items.filter(inScope);
+      if (!items.length) return;
+      // 標題前的「一、二、三」依目前顯示的大題重新編號
+      const title = sec.title.replace(/^[一二三四五六七八九十]+、/, CN[secNo] + '、');
+      secNo++;
+      root.appendChild(el('h2', null, title));
+      if (sec.note) root.appendChild(el('p', 'section-note', sec.note));
+      if (sec.shared) root.appendChild(el('div', 'shared-opts', sec.shared));
+      items.forEach((item, ii) => {
+        if (item.scene) root.appendChild(el('p', 'section-note', '<b>' + item.scene + '</b>'));
+        const box = el('div', 'q');
+        const stem = el('div', 'stem');
+        stem.appendChild(el('span', 'no', (ii + 1) + '.'));
+        stem.appendChild(el('span', null, item.q + (item.later ? '<span class="tag-later">' + (item.u || '全冊') + '</span>' : '')));
+        box.appendChild(stem);
+        const cs = el('div', 'choices');
+        const rec = { sec, item, el: box, picked: sec.type === 'multi' ? new Set() : null, btns: [] };
+        choiceSet(sec, item).forEach(c => {
+          const b = el('button', 'choice' + (['tf', 'check', 'match'].includes(sec.type) ? ' big' : ''), c.t);
+          b.type = 'button';
+          b.addEventListener('click', () => {
+            if (root.classList.contains('done')) return;
+            if (sec.type === 'multi') {
+              rec.picked.has(c.v) ? rec.picked.delete(c.v) : rec.picked.add(c.v);
+              b.classList.toggle('sel');
+            } else {
+              rec.picked = c.v;
+              rec.btns.forEach(x => x.classList.remove('sel'));
+              b.classList.add('sel');
+            }
+          });
+          b.dataset.v = c.v;
+          rec.btns.push(b);
+          cs.appendChild(b);
         });
-        b.dataset.v = c.v;
-        rec.btns.push(b);
-        cs.appendChild(b);
+        box.appendChild(cs);
+        const fb = el('div', 'feedback',
+          '<span class="ans"></span> ' + (item.exp || '') +
+          (item.page ? ' <span class="page">（課本 ' + item.page + '）</span>' : ''));
+        box.appendChild(fb);
+        rec.fb = fb;
+        root.appendChild(box);
+        state.push(rec);
       });
-      box.appendChild(cs);
-      const fb = el('div', 'feedback',
-        '<span class="ans"></span> ' + (item.exp || '') +
-        (item.page ? ' <span class="page">（課本 ' + item.page + '）</span>' : ''));
-      box.appendChild(fb);
-      rec.fb = fb;
-      root.appendChild(box);
-      state.push(rec);
-      qNo++;
     });
-  });
-
-  const total = data.sections.reduce((s, sec) =>
-    s + sec.items.reduce((t, it) => t + (sec.type === 'multi' ? sec.points * it.opts.length : sec.points), 0), 0);
-  const scoreEl = document.getElementById('score');
-  scoreEl.textContent = '滿分 ' + total + ' 分';
+    total = state.reduce((s, r) => s + (r.sec.type === 'multi' ? r.sec.points * r.item.opts.length : r.sec.points), 0);
+    scoreEl.textContent = '共 ' + state.length + ' 題，滿分 ' + total + ' 分';
+  }
 
   function grade() {
     let got = 0, wrong = 0;
@@ -118,7 +131,7 @@
       r.el.classList.remove('ok', 'bad');
     });
     root.classList.remove('done');
-    scoreEl.textContent = '滿分 ' + total + ' 分';
+    scoreEl.textContent = '共 ' + state.length + ' 題，滿分 ' + total + ' 分';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   function showAnswers() {
@@ -132,7 +145,25 @@
     });
     root.classList.add('done');
   }
+
+  function setScope(v) {
+    scope = v;
+    document.body.classList.toggle('s12', v === '12');
+    scopeBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.s === v)));
+    try { localStorage.setItem(data.scopeKey, v); } catch (e) {}
+    build();
+  }
+
   document.getElementById('submit').addEventListener('click', grade);
   document.getElementById('reset').addEventListener('click', reset);
   document.getElementById('answers').addEventListener('click', showAnswers);
+
+  if (data.scopeKey && scopeBtns.length) {
+    scopeBtns.forEach(b => b.addEventListener('click', () => setScope(b.dataset.s)));
+    let saved = '12';
+    try { saved = localStorage.getItem(data.scopeKey) || '12'; } catch (e) {}
+    setScope(saved);
+  } else {
+    build();
+  }
 })();

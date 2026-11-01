@@ -85,6 +85,18 @@ mark, .hl { background: var(--mark); padding: 0 2px; border-radius: 3px; }
 .done .choice { cursor: default; }
 .page { color: var(--muted); font-size: 14px; }
 
+/* 範圍切換（期中考 / 全冊） */
+.scope { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0 4px; font-size: 16px; }
+.scope button { font: inherit; border: 2px solid var(--line); background: var(--card); border-radius: 999px; padding: 4px 14px; cursor: pointer; min-height: 38px; color: var(--ink); }
+.scope button[aria-pressed="true"] { border-color: var(--theme); background: color-mix(in srgb, var(--theme) 12%, white); font-weight: 700; }
+body.s12 .later { display: none !important; }
+.unit { font-size: 20px; font-weight: 700; color: var(--theme); border-top: 3px double var(--line); padding-top: 12px; margin-top: 40px; letter-spacing: .06em; }
+.tag-later { font-size: 13px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 0 8px; margin-left: 6px; vertical-align: 2px; }
+figure.fig { margin: 10px 0; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+figure.fig svg { width: 100%; height: auto; display: block; }
+figure.fig figcaption { font-size: 14px; color: var(--muted); margin-top: 4px; }
+.sw { display: inline-block; width: 14px; height: 14px; border-radius: 4px; margin-right: 6px; vertical-align: -2px; border: 1px solid rgba(0,0,0,.15); }
+
 @media (max-width: 520px) {
   body { font-size: 17px; }
   .choices, .feedback { margin-left: 0; }
