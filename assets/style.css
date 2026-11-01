@@ -121,3 +121,10 @@ figure.sketch figcaption { font-size: 16px; color: var(--muted); padding: 6px 4p
 .swipe-hint { display: none; margin: 0 0 4px; font-size: 14px; color: var(--muted); text-align: center; }
 @media (max-width: 640px) { .swipe-hint { display: block; } }
 @media print { .swipe-hint { display: none !important; } }
+
+/* 色鉛筆插圖海報 */
+figure.poster { margin: 16px auto 20px; max-width: 640px; text-align: center; }
+figure.poster img { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--line); box-shadow: 0 2px 10px rgba(80, 60, 30, .12); background: #f6efe2; }
+figure.poster figcaption { text-align: left; font-size: 16px; color: var(--muted); padding: 8px 4px 0; }
+.zoom-hint { color: var(--muted); font-size: 14px; }
+@media print { figure.poster { break-inside: avoid; max-width: 100%; } .zoom-hint { display: none; } }
