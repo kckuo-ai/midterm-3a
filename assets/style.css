@@ -110,3 +110,14 @@ figure.fig figcaption { font-size: 14px; color: var(--muted); margin-top: 4px; }
   .done .feedback { display: block; }
   .wrap { padding: 0; }
 }
+
+/* 手繪風格圖 */
+figure.sketch { margin: 14px 0 18px; background: #fffdf8; border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 10px 6px; }
+figure.sketch svg { display: block; width: 100%; height: auto; }
+.sketch-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+figure.sketch figcaption { font-size: 16px; color: var(--muted); padding: 6px 4px 2px; }
+@media (max-width: 640px) { figure.sketch svg { min-width: 640px; } }
+@media print { figure.sketch { break-inside: avoid; } figure.sketch svg { min-width: 0; } }
+.swipe-hint { display: none; margin: 0 0 4px; font-size: 14px; color: var(--muted); text-align: center; }
+@media (max-width: 640px) { .swipe-hint { display: block; } }
+@media print { .swipe-hint { display: none !important; } }
