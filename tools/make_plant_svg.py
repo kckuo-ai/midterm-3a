@@ -46,14 +46,29 @@ def defs():
     out.append(f'<pattern id="{_P}-ht" width="4.5" height="4.5" patternUnits="userSpaceOnUse" patternTransform="rotate(40)">'
                f'<line x1="0" y1="0" x2="0" y2="4.5" stroke="#2f5d2a" stroke-width="1" opacity=".55"/></pattern>')
     # 色鉛筆質感：線條微微抖動＋紙紋顆粒
-    out.append(f'<filter id="{_P}-pencil" x="-2%" y="-2%" width="104%" height="104%">'
-               '<feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="3" result="w"/>'
-               '<feDisplacementMap in="SourceGraphic" in2="w" scale="3.4" xChannelSelector="R" yChannelSelector="G" result="d"/>'
-               '<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="n"/>'
-               '<feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  2.6 0 0 0 -0.55" result="g"/>'
-               '<feComposite in="d" in2="g" operator="in" result="gr"/>'
-               '<feComponentTransfer in="d" result="d2"><feFuncA type="linear" slope="0.62"/></feComponentTransfer>'
-               '<feMerge><feMergeNode in="d2"/><feMergeNode in="gr"/></feMerge></filter>')
+    out.append(f'<filter id="{_P}-pencil" x="-3%" y="-3%" width="106%" height="106%" color-interpolation-filters="sRGB">'
+               # 1 線條與色塊邊緣手繪般的不規則抖動（兩種尺度）
+               '<feTurbulence type="fractalNoise" baseFrequency="0.022" numOctaves="2" seed="3" result="w1"/>'
+               '<feDisplacementMap in="SourceGraphic" in2="w1" scale="5" xChannelSelector="R" yChannelSelector="G" result="d1"/>'
+               '<feTurbulence type="fractalNoise" baseFrequency="0.11" numOctaves="2" seed="9" result="w2"/>'
+               '<feDisplacementMap in="d1" in2="w2" scale="2.2" xChannelSelector="G" yChannelSelector="R" result="d"/>'
+               # 2 把深色的線條與淺色的上色分開處理
+               '<feColorMatrix in="d" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -5 -5 0 0 6.5" result="lm"/>'
+               '<feComposite in="d" in2="lm" operator="in" result="lines"/>'
+               # 3 上色：顏色微微暈開，再加一筆一筆的筆觸濃淡
+               '<feGaussianBlur in="d" stdDeviation="1.1" result="soft"/>'
+               '<feTurbulence type="fractalNoise" baseFrequency="0.8 0.045" numOctaves="2" seed="5" result="st"/>'
+               '<feColorMatrix in="st" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  3 0 0 0 -0.7" result="stm"/>'
+               '<feComposite in="soft" in2="stm" operator="in" result="stroke"/>'
+               '<feComponentTransfer in="soft" result="base"><feFuncA type="linear" slope="0.72"/></feComponentTransfer>'
+               '<feMerge result="fillc"><feMergeNode in="base"/><feMergeNode in="stroke"/></feMerge>'
+               # 4 紙張顆粒：上色處有較多細小白點，線條處較少
+               '<feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="1" seed="11" result="gn"/>'
+               '<feColorMatrix in="gn" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -12 0 0 0 8.2" result="gf"/>'
+               '<feColorMatrix in="gn" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -12 0 0 0 9.0" result="gl"/>'
+               '<feComposite in="fillc" in2="gf" operator="in" result="fg"/>'
+               '<feComposite in="lines" in2="gl" operator="in" result="lg"/>'
+               '<feMerge><feMergeNode in="fg"/><feMergeNode in="lg"/></feMerge></filter>')
     out.append(f'<filter id="{_P}-paper" x="0" y="0" width="100%" height="100%">'
                '<feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" seed="2"/>'
                '<feColorMatrix type="matrix" values="0 0 0 0 .55  0 0 0 0 .48  0 0 0 0 .38  0 0 0 .30 0"/></filter>')
@@ -281,7 +296,7 @@ def rootbranch(rng, x, y, ang, length, w, depth, out):
     bend = rng.uniform(-.22, .22) * length
     cx, cy = (x + ex) / 2 + bend * math.sin(a), (y + ey) / 2 - bend * math.cos(a)
     pts = qb((x, y), (cx, cy), (ex, ey), 12)
-    out.append(tube(pts, w, max(w * .35, .7), U("root"), "#8b6b43", 0.7))
+    out.append(tube(pts, w, max(w * .35, .7), U("root"), "#5e4224", 0.95))
     if depth > 0:
         for tt in (.3, .55, .78):
             px, py = pts[int(tt * 12)]
@@ -334,7 +349,7 @@ def overview():
     b += ell(tx, 54, 4, 6.5, "#7a9c4f", INK, 0.8)
     rr = []
     tap = qb((sx, gy), (sx + 10, gy + 100), (sx - 6, gy + 230), 18)
-    rr.append(tube(tap, 11, 2.2, U("root"), "#8b6b43", 0.8))
+    rr.append(tube(tap, 11, 2.2, U("root"), "#5e4224", 1.0))
     for i, t in enumerate((.1, .2, .3, .42, .55, .68, .8)):
         px, py = tap[int(t * 18)]
         side = 1 if i % 2 == 0 else -1
@@ -491,7 +506,7 @@ def roots():
         b += leaf(cx + (k % 3 - 1) * 4, gy - 4, L, 24, ang, "ovate", "entire", "net", detail=False, fill="lf" if k % 2 else "lf2")
     rr = []
     tap = qb((cx, gy), (cx + 6, gy + 120), (cx - 4, gy + 290), 18)
-    rr.append(tube(tap, 18, 2.4, U("root"), "#8b6b43", .9))
+    rr.append(tube(tap, 18, 2.4, U("root"), "#5e4224", 1.1))
     for i, t in enumerate((.08, .16, .26, .36, .47, .58, .7, .82)):
         px, py = tap[int(t * 18)]
         side = 1 if i % 2 == 0 else -1
