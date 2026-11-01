@@ -536,8 +536,8 @@ def flower():
     cx = 330
     b = tube(qb((cx, H - 6), (cx + 6, 500), (cx, 462), 8), 12, 12, U("stg"), INK, 1)
     b += petal(cx - 4, 440, cx - 62, 96, 34, -8, U("pk2")) + petal(cx + 4, 440, cx + 66, 100, 34, 8, U("pk2"))
-    b += petal(cx - 10, 458, cx - 118, 410, 17, -10, U("lf2")) + petal(cx + 10, 458, cx + 120, 408, 17, 10, U("lf2"))
     b += petal(cx - 12, 440, cx - 150, 124, 40, -26, U("pk")) + petal(cx + 12, 440, cx + 154, 130, 40, 26, U("pk"))
+    b += petal(cx - 22, 452, cx - 104, 392, 15, -7, U("lf2")) + petal(cx + 22, 452, cx + 104, 392, 15, 7, U("lf2"))
     for ax, ay, rot in [(cx - 52, 232, -25), (cx - 30, 210, -10), (cx + 36, 212, 10), (cx + 58, 236, 25)]:
         sx = cx + (-14 if ax < cx else 14)
         fil = sm(qb((sx, 440), (sx + (ax - sx) * .2, 340), (ax, ay + 8), 10))
@@ -558,12 +558,12 @@ def flower():
     b += pa(f"M{cx+58},222 C{cx+110},150 {cx+60},150 {cx+14},160", "none", "#e08a00", 1.6, extra='stroke-dasharray="5 4"')
     b += f'<polygon points="{cx+12},160 {cx+22},154 {cx+21},166" fill="#e08a00"/>'
     L = 600
-    b += label(cx + 104, 186, L, 90, "花瓣", "顏色鮮豔，吸引動物", "start")
+    b += label(cx + 112, 240, L, 90, "花瓣", "顏色鮮豔，吸引動物", "start")
     b += label(cx + 58, 236, L, 180, "雄蕊", "花絲＋花藥（有花粉）", "start")
     b += label(cx + 8, 165, L, 252, "柱頭", "黏黏的，接住花粉", "start")
     b += label(cx + 3, 290, L, 316, "花柱", "", "start")
     b += label(cx + 18, 426, L, 380, "子房", "裡面有胚珠", "start")
-    b += label(cx + 118, 410, L, 446, "花萼", "保護花苞", "start")
+    b += label(cx + 66, 419, L, 446, "花萼", "在花瓣外圍，保護花苞", "start")
     b += label(cx + 22, 458, L, 508, "花托", "", "start")
     b += inset("pl", 110, 440, 64, f'<rect x="40" y="370" width="140" height="140" fill="#fff7dc"/>{pollen(110, 440, 70, rng)}')
     b += ln(166, 408, cx - 40, 238, "#888", .9, "3 3") + txt(110, 530, "花粉（放大）", 14, "#444", "normal", "middle")
