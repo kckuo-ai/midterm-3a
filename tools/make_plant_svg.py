@@ -665,7 +665,7 @@ def dispersal():
         b += leaf(lx, ly, 70, 17, ang, "elliptic", "entire", "net", detail=False) + leaf(lx, ly, 62, 16, ang - 38, "elliptic", "entire", "net", detail=False)
     for fx, fy in ((196, 138), (222, 148), (214, 170), (240, 134), (180, 162), (240, 164), (205, 191)):
         b += ln(fx, fy, 218, 90, "#7a6a45", 1) + circ(fx, fy, 13, U("lon"), INK, 1) + circ(fx - 4, fy - 4, 3, "#fff", "none", 0).replace('fill="#fff"', 'fill="#fff" opacity=".35"')
-    b += tube(qb((240, 176), (300, 172), (372, 164), 10), 6, 4, U("bark"), INK, .9) + bird(306, 124, 1.0, True) + "</g>"
+    b += tube(qb((356, 97), (350, 160), (262, 190), 14), 9, 4, U("bark"), INK, .9) + bird(313, 121, 1.0, True) + "</g>"
     b += arrow(290, 210, 336, 300, "#c2402a", 1.6, "5 4")
     b += ell(342, gy - 6, 5, 7, "#4a3320", "none", 0) + sprout(372, gy + 2)
     b += txt(40, 40, "動物傳播：龍眼、木瓜", 18, "#1f1f1f", "bold") + txt(40, 62, "果實芳香甜美，吸引動物來吃", 13, "#666")
