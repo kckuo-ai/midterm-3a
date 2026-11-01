@@ -189,7 +189,100 @@ def roots():
     return svg(W, H, "兩種根：軸根有一條粗根深入土壤，鬚根細小分布在土壤淺層", b)
 
 
-FIGS = {"plant-overview": overview, "leaf-detail": leaf_detail, "stem-types": stems, "root-types": roots}
+# ---------- 圖五：花的構造 ----------
+def flower():
+    W, H = 720, 360
+    cx, cy = 300, 150
+    b = rough_line(cx, cy + 40, cx, 335, "#5f8f48", 5, 1)
+    b += leaf(cx, 285, 70, 18, -25, False, None) + leaf(cx, 270, 70, 18, -155, False, None)
+    # 花萼（花下方的綠色小片）
+    for a in (-60, 0, 60):
+        b += leaf(cx, cy + 46, 46, 12, 90 + a, False, None, "#9cc98a")
+    # 花瓣
+    for k in range(6):
+        a = k * 60 - 90
+        b += leaf(cx, cy, 82, 24, a, False, None, "#ffc9d6")
+    # 雌蕊（中間一根）+ 雄蕊
+    b += f'<rect x="{cx-5}" y="{cy-30}" width="10" height="46" rx="5" fill="#9bd07a" stroke="{INK}" stroke-width="1.8"/>'
+    b += rough_circle(cx, cy - 34, 8, INK, "#7fbf5a", 1.8)
+    for dx in (-26, -16, 16, 26):
+        b += rough_line(cx + dx * 0.4, cy + 12, cx + dx, cy - 22, INK, 1.8, 1)
+        b += rough_circle(cx + dx, cy - 26, 5.5, "#c28a00", "#ffd34d", 1.6)
+    # 標註
+    b += note(358, 118, 490, 44, 500, 38, "花瓣", "顏色鮮豔，吸引動物", "start")
+    b += note(326, 124, 490, 104, 500, 98, "雄蕊", "頂端有花粉（小蕊）", "start")
+    b += note(300, 135, 490, 164, 500, 158, "雌蕊", "通常一根，在中間（大蕊）", "start")
+    b += note(312, 200, 490, 224, 500, 218, "花萼", "在花瓣下面，保護花苞", "start")
+    b += text(120, 330, "花粉傳到雌蕊，才能結果實", 17, "#6d685f")
+    return svg(W, H, "花的構造：花萼、花瓣、雄蕊、雌蕊", b)
+
+
+# ---------- 圖六：花 → 果實 → 種子 ----------
+def fruit_seed():
+    W, H = 720, 280
+    b = ""
+    xs = (90, 260, 430, 620)
+    # 1 花
+    cx, cy = xs[0], 110
+    b += rough_line(cx, cy + 20, cx, 190, "#5f8f48", 4, 1)
+    for k in range(5):
+        b += leaf(cx, cy, 36, 12, k * 72 - 90, False, None, "#ffc9d6")
+    b += rough_circle(cx, cy, 7, "#c28a00", "#ffd34d", 1.8)
+    # 2 未成熟果實（綠）
+    cx = xs[1]
+    b += rough_line(cx, 60, cx, 100, "#5f8f48", 4, 1)
+    b += rough_circle(cx, 140, 38, INK, "#b9d98a", 2.2)
+    # 3 成熟果實（紅）
+    cx = xs[2]
+    b += rough_line(cx, 60, cx, 100, "#5f8f48", 4, 1)
+    b += rough_circle(cx, 140, 42, INK, "#f08a6a", 2.2)
+    b += leaf(cx, 100, 30, 9, -30, False, None)
+    # 4 剖開：種子
+    cx = xs[3]
+    b += rough_circle(cx, 140, 48, INK, "#f4a98c", 2.2)
+    b += rough_circle(cx, 140, 34, "#c9744f", "#ffe9c9", 1.6)
+    for dx, dy in ((-14, -8), (12, -12), (0, 8), (-10, 16), (16, 10)):
+        b += f'<ellipse cx="{cx+dx}" cy="{140+dy}" rx="5" ry="7" fill="#7a4b2a" stroke="{INK}" stroke-width="1.2"/>'
+    for a in range(0, 3):
+        pass
+    for x1, x2 in ((xs[0] + 55, xs[1] - 55), (xs[1] + 55, xs[2] - 58), (xs[2] + 58, xs[3] - 62)):
+        b += rough_line(x1, 140, x2, 140, "#c2572e", 2.2, 1) + f'<path d="M{x2-8},132 L{x2},140 L{x2-8},148" fill="none" stroke="#c2572e" stroke-width="2.2" stroke-linecap="round"/>'
+    for x, t, sub in ((xs[0], "花", "開花後"), (xs[1], "未成熟果實", "綠色、還硬"), (xs[2], "成熟果實", "顏色鮮豔"), (xs[3], "種子", "果實裡面")):
+        b += text(x, 228, t, 20, "#2b2a27", "bold") + text(x, 252, sub, 15, "#6d685f")
+    return svg(W, H, "花開後結出未成熟果實，長大成熟，剖開果實裡面有種子", b)
+
+
+# ---------- 圖七：種子傳播 ----------
+def dispersal():
+    W, H, gy = 720, 300, 220
+    b = f'<rect x="3" y="{gy}" width="{W-6}" height="{H-gy-3}" rx="10" fill="{SOIL}"/>' + rough_line(6, gy, W - 6, gy, "#8a6a43", 2.4, 2)
+    # 左：動物吃果實（龍眼、木瓜）
+    cx = 170
+    b += rough_circle(cx - 60, 110, 24, INK, "#d9a960", 2.0) + rough_circle(cx - 20, 100, 24, INK, "#d9a960", 2.0)
+    b += rough_line(cx - 60, 86, cx - 40, 60, "#5f8f48", 3, 1) + rough_line(cx - 20, 76, cx - 40, 60, "#5f8f48", 3, 1)
+    # 小鳥
+    bx, by = cx + 50, 110
+    b += f'<ellipse cx="{bx}" cy="{by}" rx="22" ry="14" fill="#8fb8e0" stroke="{INK}" stroke-width="1.8"/>'
+    b += rough_circle(bx + 20, by - 10, 9, INK, "#8fb8e0", 1.8)
+    b += f'<polygon points="{bx+28},{by-12} {bx+40},{by-9} {bx+28},{by-6}" fill="#f0a030" stroke="{INK}" stroke-width="1.2"/>'
+    b += f'<polygon points="{bx-22},{by} {bx-42},{by-8} {bx-38},{by+6}" fill="#6f9fd0" stroke="{INK}" stroke-width="1.6"/>'
+    b += rough_line(cx + 60, by + 30, cx + 110, gy - 6, "#c2572e", 2, 1, "6 6")
+    b += f'<ellipse cx="{cx+112}" cy="{gy-8}" rx="5" ry="7" fill="#7a4b2a" stroke="{INK}" stroke-width="1.2"/>'
+    b += text(cx, 262, "龍眼、木瓜", 20, "#2b2a27", "bold") + text(cx, 286, "果實芳香甜美，動物吃了把種子帶走", 14, "#6d685f")
+    # 右：風（臺灣欒樹，像氣球）
+    cx = 520
+    for dx, dy in ((-50, 90), (0, 70), (50, 100)):
+        b += f'<ellipse cx="{cx+dx}" cy="{dy}" rx="20" ry="26" fill="#f7c68a" stroke="{INK}" stroke-width="2"/>'
+        b += rough_line(cx + dx, dy - 26, cx + dx * 0.4, 36, "#5f8f48", 2.6, 1)
+        b += f'<ellipse cx="{cx+dx}" cy="{dy}" rx="5" ry="6" fill="#4a3320"/>'
+    for y in (120, 150, 180):
+        b += f'<path d="M{cx+80},{y} q20,-12 40,0 t40,0" fill="none" stroke="#7fa8c8" stroke-width="2.4" stroke-linecap="round"/>'
+    b += text(cx + 30, 210, "風", 17, "#4f7fa6", "bold")
+    b += text(cx, 262, "臺灣欒樹", 20, "#2b2a27", "bold") + text(cx, 286, "果實像氣球，種子隨風飄", 14, "#6d685f")
+    return svg(W, H, "種子的傳播：動物吃果實帶走種子，臺灣欒樹的果實像氣球隨風飄", b)
+
+
+FIGS = {"plant-overview": overview, "leaf-detail": leaf_detail, "stem-types": stems, "root-types": roots, "flower": flower, "fruit-seed": fruit_seed, "dispersal": dispersal}
 
 
 def inject():
