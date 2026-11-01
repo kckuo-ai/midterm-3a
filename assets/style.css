@@ -128,3 +128,13 @@ figure.poster img { display: block; width: 100%; height: auto; border-radius: 12
 figure.poster figcaption { text-align: left; font-size: 16px; color: var(--muted); padding: 8px 4px 0; }
 .zoom-hint { color: var(--muted); font-size: 14px; }
 @media print { figure.poster { break-inside: avoid; max-width: 100%; } .zoom-hint { display: none; } }
+
+/* 分段插圖與總複習 */
+figure.panel { margin: 14px auto 18px; max-width: 460px; }
+figure.panel.wide { max-width: 720px; }
+figure.panel img { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--line); background: #fbf6ec; }
+figure.panel figcaption { font-size: 16px; color: var(--muted); padding: 6px 4px 0; }
+.poster-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.poster-grid figure.poster { margin: 0; max-width: none; }
+figure.poster.summary { max-width: 560px; }
+@media print { figure.panel { break-inside: avoid; } .poster-grid { display: block; } }

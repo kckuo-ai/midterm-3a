@@ -10,3 +10,5 @@
 - 練習卷題目放在各科的 `quiz-data.js`，作答與計分程式在 `assets/quiz.js`。
 - 新增題目：在 `quiz-data.js` 對應大題的 `items` 加一筆即可（`tf` 是非、`mc` 選擇、`multi` 活用、`match` 配合、`check` 勾選）。
 - 範圍切換：題目加 `later: true` 代表不在期中考範圍，只在「全冊」出現；重點整理頁用 `<div class="later">` 包住期中不考的內容。
+
+- 圖片：自然插圖在 `science/img/`（p01–p08 分段插圖、3a_01–04 總複習海報），社會補充圖解在 `social/img/`；一頁總複習 PDF 與預覽圖在 `print/`。
