@@ -296,17 +296,17 @@ def rootbranch(rng, x, y, ang, length, w, depth, out):
     bend = rng.uniform(-.22, .22) * length
     cx, cy = (x + ex) / 2 + bend * math.sin(a), (y + ey) / 2 - bend * math.cos(a)
     pts = qb((x, y), (cx, cy), (ex, ey), 12)
-    out.append(tube(pts, w, max(w * .35, .7), U("root"), "#5e4224", 0.95))
+    out.append(tube(pts, w, max(w * .4, 1.3), "#f6e6c4", "#3f2a14", 1.4))
     if depth > 0:
         for tt in (.3, .55, .78):
             px, py = pts[int(tt * 12)]
             side = rng.choice((-1, 1))
-            rootbranch(rng, px, py, ang + side * rng.uniform(35, 65), length * rng.uniform(.35, .5), w * .55, depth - 1, out)
+            rootbranch(rng, px, py, ang + side * rng.uniform(35, 65), length * rng.uniform(.4, .55), w * .62, depth - 1, out)
     else:
-        for _ in range(4):
-            px, py = pts[rng.randint(6, 12)]
-            b = a + rng.uniform(-1.4, 1.4)
-            out.append(ln(px, py, px + 6 * math.cos(b), py + 6 * math.sin(b), "#a4854f", 0.5))
+        for _ in range(2):
+            px, py = pts[rng.randint(7, 12)]
+            b = a + rng.uniform(-1.2, 1.2)
+            out.append(ln(px, py, px + 6 * math.cos(b), py + 6 * math.sin(b), "#6b4a24", 0.9))
 
 
 def sun(cx, cy, r=24):
@@ -349,11 +349,11 @@ def overview():
     b += ell(tx, 54, 4, 6.5, "#7a9c4f", INK, 0.8)
     rr = []
     tap = qb((sx, gy), (sx + 10, gy + 100), (sx - 6, gy + 230), 18)
-    rr.append(tube(tap, 11, 2.2, U("root"), "#5e4224", 1.0))
+    rr.append(tube(tap, 15, 3, "#f6e6c4", "#3f2a14", 1.5))
     for i, t in enumerate((.1, .2, .3, .42, .55, .68, .8)):
         px, py = tap[int(t * 18)]
         side = 1 if i % 2 == 0 else -1
-        rootbranch(rng, px, py, 90 - side * rng.uniform(38, 62), rng.uniform(80, 120) * (1 - t * .5), 4.5 - 2 * t, 1, rr)
+        rootbranch(rng, px, py, 90 - side * rng.uniform(38, 62), rng.uniform(80, 120) * (1 - t * .5), 6.5 - 2.8 * t, 1, rr)
     b += "".join(rr)
     b += arrow(660, 430, 560, 400, "#2f78b5", 1.6, "5 4") + arrow(150, 440, 240, 400, "#2f78b5", 1.6, "5 4") + arrow(190, 330, 270, 340, "#2f78b5", 1.6, "5 4")
     b += txt(668, 440, "水", 17, "#2f78b5", "bold") + txt(130, 452, "水", 17, "#2f78b5", "bold") + txt(160, 336, "水", 17, "#2f78b5", "bold")
@@ -506,11 +506,11 @@ def roots():
         b += leaf(cx + (k % 3 - 1) * 4, gy - 4, L, 24, ang, "ovate", "entire", "net", detail=False, fill="lf" if k % 2 else "lf2")
     rr = []
     tap = qb((cx, gy), (cx + 6, gy + 120), (cx - 4, gy + 290), 18)
-    rr.append(tube(tap, 18, 2.4, U("root"), "#5e4224", 1.1))
+    rr.append(tube(tap, 26, 3.5, "#f6e6c4", "#3f2a14", 1.6))
     for i, t in enumerate((.08, .16, .26, .36, .47, .58, .7, .82)):
         px, py = tap[int(t * 18)]
         side = 1 if i % 2 == 0 else -1
-        rootbranch(rng, px, py, 90 - side * rng.uniform(40, 60), rng.uniform(70, 105) * (1 - t * .55), 4.2 - 2.2 * t, 1, rr)
+        rootbranch(rng, px, py, 90 - side * rng.uniform(40, 60), rng.uniform(75, 110) * (1 - t * .55), 7.5 - 3.5 * t, 1, rr)
     b += "".join(rr)
     b += label(cx + 4, gy + 140, 330, gy + 150, "主根", "一條粗根往下長", "start")
     b += label(cx + 52, gy + 112, 330, gy + 214, "側根", "旁邊長出較細的根", "start")
@@ -524,7 +524,7 @@ def roots():
     for k in range(30):
         a = 90 + (k - 15) * 5.2 + rng.uniform(-3, 3)
         L = rng.uniform(70, 125) * (1 - abs(k - 15) / 40)
-        rootbranch(rng, cx + (k - 15) * 1.2, gy + 12, a, L, 2.3, 1, rr)
+        rootbranch(rng, cx + (k - 15) * 1.2, gy + 12, a, L, 3.2, 1, rr)
     b += "".join(rr)
     b += label(cx + 42, gy + 90, 640, gy + 160, "鬚根", "細小的根", "start")
     b += arrow(740, gy + 14, 740, gy + 108, "#c2402a", 1.6) + txt(734, gy + 66, "淺層", 14, "#c2402a", "bold", "end")
